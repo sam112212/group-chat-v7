@@ -1,0 +1,23 @@
+{
+  "owner": [
+    "ban",
+    "kick",
+    "mute",
+    "assign"
+  ],
+  "superadmin": [
+    "ban",
+    "kick",
+    "mute",
+    "assign"
+  ],
+  "admin": [
+    "ban",
+    "kick",
+    "mute"
+  ],
+  "mod": [
+    "kick",
+    "mute"
+  ]
+}

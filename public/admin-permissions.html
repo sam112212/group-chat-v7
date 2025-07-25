@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>إدارة صلاحيات الرتب</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      padding: 20px;
+      direction: rtl;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>إدارة صلاحيات الرتب</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>الرتبة</th>
+        <th>حظر</th>
+        <th>كتم</th>
+        <th>طرد</th>
+        <th>نقل أدوار</th>
+      </tr>
+    </thead>
+    <tbody id="permissions-table"></tbody>
+  </table>
+  <div style="text-align:center;">
+    <button onclick="savePermissions()">💾 حفظ التعديلات</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const ranks = ['owner', 'superadmin', 'admin', 'mod'];
+    const permissions = ['ban', 'mute', 'kick', 'assign'];
+    let rolePermissions = {};
+
+    function createTable() {
+      const tbody = document.getElementById("permissions-table");
+      tbody.innerHTML = "";
+      ranks.forEach(rank => {
+        const row = document.createElement("tr");
+        const roleCell = document.createElement("td");
+        roleCell.textContent = rank;
+        row.appendChild(roleCell);
+
+        permissions.forEach(perm => {
+          const cell = document.createElement("td");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = rolePermissions[rank]?.includes(perm);
+          checkbox.dataset.rank = rank;
+          checkbox.dataset.permission = perm;
+          cell.appendChild(checkbox);
+          row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+      });
+    }
+
+    socket.on("role-permissions-data", (data) => {
+      rolePermissions = data;
+      createTable();
+    });
+
+    socket.emit("get-role-permissions");
+
+    function savePermissions() {
+      const updated = {};
+      document.querySelectorAll("input[type='checkbox']").forEach(cb => {
+        const rank = cb.dataset.rank;
+        const perm = cb.dataset.permission;
+        if (!updated[rank]) updated[rank] = [];
+        if (cb.checked) updated[rank].push(perm);
+      });
+      socket.emit("update-role-permissions", updated);
+      alert("✅ تم حفظ التعديلات بنجاح!");
+    }
+  </script>
+</body>
+</html>

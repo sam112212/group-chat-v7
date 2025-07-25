@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>تسجيل الدخول</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; background: #f1f1f1; }
+    input, select, button { padding: 8px; margin: 5px; }
+    .avatar-grid { display: none; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 10px; }
+    .avatar-grid span { cursor: pointer; font-size: 24px; border: 1px solid #ccc; padding: 5px; border-radius: 6px; }
+    #adminFields { display: none; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>🎙️ أهلاً بك في الدردشة</h2>
+
+  <div>🟢 عدد المتصلين الآن: <span id="liveCount">--</span></div>
+
+  <input type="text" id="name" placeholder="اكتب اسمك"><br>
+
+  <button onclick="document.getElementById('avatarGrid').style.display='grid'">🎭 اختر الأيقونة</button>
+  <div id="avatarGrid" class="avatar-grid">
+    <span onclick="selectAvatar('👨')">👨</span>
+    <span onclick="selectAvatar('👩')">👩</span>
+    <span onclick="selectAvatar('👧')">👧</span>
+    <span onclick="selectAvatar('👦')">👦</span>
+    <span onclick="selectAvatar('👴')">👴</span>
+    <span onclick="selectAvatar('👵')">👵</span>
+    <span onclick="selectAvatar('🎵')">🎵</span>
+    <span onclick="selectAvatar('❤️')">❤️</span>
+    <span onclick="selectAvatar('🌙')">🌙</span>
+    <span onclick="selectAvatar('⭐')">⭐</span>
+    <span onclick="selectAvatar('🎧')">🎧</span>
+    <span onclick="selectAvatar('🌟')">🌟</span>
+  </div>
+
+  <div id="selectedAvatar" style="font-size: 24px; margin: 10px;"></div>
+
+  <div>
+    <button onclick="showAdmin()">🔐 دخول كإدمن</button>
+    <button onclick="hideAdmin()" style="display:none;" id="backBtn">↩️ عودة للعضو العادي</button>
+  </div>
+
+  <div id="adminFields">
+    <input type="password" id="password" placeholder="كلمة المرور"><br>
+  </div>
+
+  <button onclick="login()">🚪 دخول</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let avatar = '';
+
+    function selectAvatar(emo) {
+      avatar = emo;
+      document.getElementById('selectedAvatar').textContent = 'تم اختيار: ' + emo;
+      document.getElementById('avatarGrid').style.display = 'none';
+      localStorage.setItem('chosenAvatar', emo);
+    }
+
+    function showAdmin() {
+      document.getElementById('adminFields').style.display = 'block';
+      document.getElementById('backBtn').style.display = 'inline';
+    }
+
+    function hideAdmin() {
+      document.getElementById('adminFields').style.display = 'none';
+      document.getElementById('backBtn').style.display = 'none';
+    }
+
+    function login() {
+      const name = document.getElementById('name').value.trim();
+      const password = document.getElementById('password')?.value || '';
+      if (!name) return alert('❗ أدخل اسمك');
+      window.location.href = `/chat.html?name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}&avatar=${encodeURIComponent(avatar)}`;
+    }
+
+    socket.emit('get-current-count');
+    socket.on('current-user-count', (count) => {
+      document.getElementById('liveCount').textContent = count;
+    });
+
+    window.onload = () => {
+      const saved = localStorage.getItem('chosenAvatar');
+      if (saved) {
+        avatar = saved;
+        document.getElementById('selectedAvatar').textContent = 'تم اختيار: ' + avatar;
+      }
+    };
+  </script>
+</body>
+</html>
