@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -12,8 +11,19 @@
       margin: 0;
       padding: 0;
       display: flex;
-      flex-direction: column;
       height: 100vh;
+    }
+    #sidebar {
+      width: 200px;
+      background: #1a1a1a;
+      padding: 10px;
+      border-left: 1px solid #333;
+      overflow-y: auto;
+    }
+    #main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
     #chat-box {
       flex: 1;
@@ -61,52 +71,81 @@
       cursor: pointer;
       text-align: center;
     }
+    #emojiPopupClose {
+      grid-column: span 5;
+      text-align: center;
+      cursor: pointer;
+      color: red;
+    }
   </style>
 </head>
 <body>
-  <div id="chat-box"></div>
+  <div id="sidebar">
+    <h4>المتواجدون</h4>
+    <ul id="user-list" style="list-style: none; padding: 0;"></ul>
+  </div>
 
-  <form id="form">
-    <button type="button" id="openEmojiPicker">اختر أيقونة</button>
-    <div id="emojiPopup">
-      <span class="emoji-option">👨</span><span class="emoji-option">👩</span>
-      <span class="emoji-option">🧔</span><span class="emoji-option">👵</span>
-      <span class="emoji-option">👶</span><span class="emoji-option">❤️</span>
-      <span class="emoji-option">💔</span><span class="emoji-option">🌟</span>
-      <span class="emoji-option">🌙</span><span class="emoji-option">🎶</span>
-      <span class="emoji-option">🔥</span><span class="emoji-option">🎉</span>
-      <span class="emoji-option">🍀</span><span class="emoji-option">💡</span>
-      <span class="emoji-option">💤</span><span class="emoji-option">👑</span>
-      <span class="emoji-option">🕊️</span><span class="emoji-option">💎</span>
-      <span class="emoji-option">🎈</span><span class="emoji-option">📌</span>
-    </div>
+  <div id="main-content">
+    <div id="chat-box"></div>
 
-    <input id="input" autocomplete="off" placeholder="اكتب رسالتك..." />
-    <select id="fontSize">
-      <option value="14px">📏 صغير</option>
-      <option value="18px" selected>📐 متوسط</option>
-      <option value="22px">🧱 كبير</option>
-    </select>
-    <input type="color" id="fontColor" value="#ffffff" />
-    <button>إرسال</button>
-  </form>
+    <form id="form">
+      <button type="button" id="openEmojiPicker">اختر أيقونة</button>
+      <div id="emojiPopup">
+        <div id="emojiPopupClose">❌ إغلاق</div>
+        <span class="emoji-option">👨</span><span class="emoji-option">👩</span>
+        <span class="emoji-option">🧔</span><span class="emoji-option">👵</span>
+        <span class="emoji-option">👶</span><span class="emoji-option">❤️</span>
+        <span class="emoji-option">💔</span><span class="emoji-option">🌟</span>
+        <span class="emoji-option">🌙</span><span class="emoji-option">🎶</span>
+        <span class="emoji-option">🔥</span><span class="emoji-option">🎉</span>
+        <span class="emoji-option">🍀</span><span class="emoji-option">💡</span>
+        <span class="emoji-option">💤</span><span class="emoji-option">👑</span>
+        <span class="emoji-option">🕊️</span><span class="emoji-option">💎</span>
+        <span class="emoji-option">🎈</span><span class="emoji-option">📌</span>
+      </div>
+
+      <input id="input" autocomplete="off" placeholder="اكتب رسالتك..." />
+      <select id="fontSize">
+        <option value="14px">📏 صغير</option>
+        <option value="18px" selected>📐 متوسط</option>
+        <option value="22px">🧱 كبير</option>
+      </select>
+      <input type="color" id="fontColor" value="#ffffff" />
+      <button type="submit">إرسال</button>
+    </form>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const emojiPopup = document.getElementById('emojiPopup');
     const openEmojiPicker = document.getElementById('openEmojiPicker');
+    const emojiPopupClose = document.getElementById('emojiPopupClose');
 
     openEmojiPicker.addEventListener('click', () => {
       emojiPopup.style.display = emojiPopup.style.display === 'grid' ? 'none' : 'grid';
+    });
+
+    emojiPopupClose.addEventListener('click', () => {
+      emojiPopup.style.display = 'none';
     });
 
     document.querySelectorAll('.emoji-option').forEach(el => {
       el.addEventListener('click', () => {
         const selected = el.textContent;
         localStorage.setItem("avatar", selected);
-        alert("✅ تم اختيار الأيقونة: " + selected);
         emojiPopup.style.display = 'none';
       });
+    });
+
+    // منع فتح قائمة الإيموجي عند الإرسال
+    document.getElementById("form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const msg = document.getElementById("input").value;
+      const chatBox = document.getElementById("chat-box");
+      if (msg.trim() !== "") {
+        chatBox.innerHTML += `<p>${msg}</p>`;
+        document.getElementById("input").value = "";
+      }
     });
   </script>
 </body>
